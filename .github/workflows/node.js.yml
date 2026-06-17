@@ -1,4 +1,3 @@
-# .github/workflows/node.js.yml
 name: Node.js CI
 
 on:
@@ -13,7 +12,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        # Usa Node.js 22 (la LTS actual) o 24
+        node-version: [22.x]   # si quieres probar varias: [22.x, 24.x]
 
     steps:
       - name: Checkout
@@ -21,7 +21,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        # ❌ ELIMINA cualquier 'version: 9' (se usará la de package.json)
+        # No especifiques versión: usará la de package.json
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -29,7 +29,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
 
-      # Si tu proyecto usa sharp, esbuild u otros con scripts de build, este paso evita el error
       - name: Approve build scripts
         run: pnpm approve-builds --yes
 
