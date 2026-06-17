@@ -1,3 +1,4 @@
+# .github/workflows/node.js.yml
 name: Node.js CI
 
 on:
@@ -10,16 +11,33 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # ❌ ELIMINA cualquier 'version: 9' (se usará la de package.json)
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
+          node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
-      - run: pnpm approve-builds --yes
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build --if-present
-      - run: pnpm test --if-present
+
+      # Si tu proyecto usa sharp, esbuild u otros con scripts de build, este paso evita el error
+      - name: Approve build scripts
+        run: pnpm approve-builds --yes
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build --if-present
+
+      - name: Test
+        run: pnpm test --if-present
